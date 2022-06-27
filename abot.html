@@ -1,0 +1,103 @@
+<html>
+    <head>
+        <h1>A simple test bot in pure vanilla javascript replying to people posting a specific message<h1>
+        <h2>Times someone said snickersbar since this page has been loaded: <span id="counter">idk, bot not working</span></h2>
+        <h2>Times replied: <span id="countertwo">idk, bot not working</span></h2>
+        <h3>Every time someone said it:</h3>
+        <span id="test"></span>
+    </head>
+    <body>
+        <script>
+
+            /* replace "PUT_HERE_THE_TOKEN_OF_THE_BOT" above with your bot token */
+            thetoken = "PUT_HERE_THE_TOKEN_OF_THE_BOT";
+
+
+            /* here is a check if you didn't do that*/
+            if (thetoken == "PUT_HERE_THE_TOKEN_OF_THE_BOT") {
+            window.alert("you have to put the bot token in the html first, you thought I'm gonna leak a token of my bot?")
+            throw new Error("no token")
+            }
+
+
+            thecounter = 0;
+            document.getElementById("counter").innerText = thecounter;
+            thecountertwo = 0
+            document.getElementById("countertwo").innerText = thecountertwo;
+
+            function sendmessages(thechannel, themessage, reply){
+              var https = new XMLHttpRequest();
+                https.open("POST",
+                          "https://api.revolt.chat/channels/"+thechannel+"/messages", true);
+                          https.setRequestHeader("x-bot-token", thetoken);
+                          https.setRequestHeader("Accept", "*/*");
+                          https.setRequestHeader("Content-Type", "application/json");
+                          https.onreadystatechange = function(){
+                                      if(https.readyState === 4){
+                                              if(https.status === 200){
+                                                          console.log("Message sent");
+                                                          thecountertwo = thecountertwo + 1
+                                                          document.getElementById("countertwo").innerText = thecountertwo;
+                                                          }
+                                              }
+                                      }
+                          https.send(JSON.stringify({
+                          content: themessage,
+                          replies: [{id: reply, mention: false}]}));
+            }
+
+
+            
+            const socket = new WebSocket('wss://ws.revolt.chat');
+
+            timer = 0;
+
+
+
+          function keepAlive(timeout = 30000) {
+              if (socket.readyState == socket.OPEN) {
+              socket.send('{"type": "Ping","data": ' + Date.now() + '}')
+              }
+              timerId = setTimeout(keepAlive, timeout);
+            }
+
+            function cancelKeepAlive() {
+              if (timerId) {
+                clearTimeout(timerId);
+              }
+            }
+
+
+
+            socket.addEventListener('open', (event) => {
+              socket.send('{"type":"Authenticate","token":"'+thetoken+'"}');
+              keepAlive();
+              });
+
+            socket.addEventListener('message', function (event) {
+                datta = event.data;
+
+                if (JSON.parse(datta)["type"] == "Ready") {
+			readything = JSON.parse(datta);
+                }
+
+                if (JSON.parse(datta)["type"] == "Message"){
+                	messago = JSON.parse(datta);
+
+
+                	if (messago["content"] == "snickersbar") {
+                        document.getElementById("test").innerHTML += '<h4>' + JSON.parse(datta)["author"] + ": " + JSON.parse(datta)["content"] + '</h4>';;;
+                        document.getElementById("test").innerHTML += '<a href="https://app.revolt.chat/channel/' + JSON.parse(datta)["_id"] + '/' + JSON.parse(datta)["_id"] +'">Message link</a>';
+                		sendmessages(messago["channel"], "the bar of snickers", messago["_id"]);
+                        thecounter = thecounter + 1;
+                        document.getElementById("counter").innerText = thecounter;
+                	}
+                }
+
+
+
+
+                });
+        </script>
+    </body>
+</html>
