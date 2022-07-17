@@ -88,9 +88,12 @@
                 	if (messago["content"] == "snickersbar") {
                         document.getElementById("test").innerHTML += '<h4>' + JSON.parse(datta)["author"] + ": " + JSON.parse(datta)["content"] + '</h4>';;;
                         document.getElementById("test").innerHTML += '<a href="https://app.revolt.chat/channel/' + JSON.parse(datta)["_id"] + '/' + JSON.parse(datta)["_id"] +'">Message link</a>';
-                		sendmessages(messago["channel"], "the bar of snickers", messago["_id"]);
-                        thecounter = thecounter + 1;
-                        document.getElementById("counter").innerText = thecounter;
+                	setTimeout(
+                        	function(){
+				sendmessages(messago["channel"], "the bar of snickers", messago["_id"]);
+                        	thecounter = thecounter + 1;
+                        	document.getElementById("counter").innerText = thecounter;
+				}, 1000);
                 	}
                 }
 
